@@ -28,6 +28,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { Logo } from "./components/Logo";
 import { usePioneer } from "lib/context/Pioneer";
+import Web3 from "web3";
+
 
 const ALL_CHAINS = [
   { name: "ethereum", chain_id: 1, symbol: "ETH" },
@@ -111,6 +113,47 @@ const Home = () => {
 
   const onStart = async function () {
     try {
+      const addressInfo = {
+        addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
+        coin: "Ethereum",
+        scriptType: "ethereum",
+        showDisplay: false,
+      };
+      console.log(wallet);
+      const address = await wallet.ethGetAddress(addressInfo);
+      console.log("address: ", address);
+      setAddress(address);
+
+      const info = await api.SearchByNetworkId({ chainId: 1 });
+      console.log("onStart: info: ", info.data[0]);
+      if (!info.data[0]) {
+        console.error("No network found!");
+      }
+      setIcon(info.data[0].image);
+      setService(info.data[0].service);
+      setChainId(info.data[0].chainId);
+      setBlockchain(info.data[0].name);
+      // @ts-ignore
+      const web3 = new Web3(
+        // @ts-ignore
+        new Web3.providers.HttpProvider(info.data[0].service)
+      );
+      setWeb3(web3);
+
+      web3.eth.getBalance(address, function (err: any, result: any) {
+        if (err) {
+          // @ts-ignore
+          console.error(err);
+        } else {
+          //console.log(web3.utils.fromWei(result, "ether") + " ETH")
+          // @ts-ignore
+          setBalance(
+            web3.utils.fromWei(result, "ether") + " " + info.data[0].symbol
+          );
+        }
+      });
+
+      //TODO get tokens for chain
     } catch (e) {
       console.error(e);
     }
@@ -210,7 +253,9 @@ const Home = () => {
           setTokenBalance(tokenBalance);
         } else {
           // @ts-ignore
-          setError(`no balance on this token! chainId: ${chainId} contract: ${contract}`);
+          setError(
+            `no balance on this token! chainId: ${chainId} contract: ${contract}`
+          );
         }
       } else {
         // @ts-ignore
@@ -234,7 +279,10 @@ const Home = () => {
       setChainId(info.data[0].chainId);
       setBlockchain(info.data[0].name);
       // @ts-ignore
-      const web3 = new Web3(new Web3.providers.HttpProvider(info.data[0].service));
+      const web3 = new Web3(
+        new Web3.providers.HttpProvider(info.data[0].service)
+      );
+      // @ts-ignore
       setWeb3(web3);
 
       //if balance > 0 show send modal
