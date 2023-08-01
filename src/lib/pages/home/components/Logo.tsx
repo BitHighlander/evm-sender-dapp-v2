@@ -6,7 +6,7 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-export const Logo = (props:any) => {
+export const Logo = (props: any) => {
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const animation = prefersReducedMotion

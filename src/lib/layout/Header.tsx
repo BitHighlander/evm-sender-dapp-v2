@@ -50,18 +50,18 @@ import {
   ModalBody,
   ModalFooter,
 } from "@chakra-ui/react";
-import { SetStateAction, useContext, useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
+import { SetStateAction, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 //pubkeys
-import Pubkey from "./Pioneer/Pubkey"
-import Balances from "./Pioneer/Balances"
+import Pubkey from "./Pioneer/Pubkey";
+import Balances from "./Pioneer/Balances";
 
-import {KeepKeyIcon} from "lib/assets/Icons/KeepKeyIcon";
-import {KeplrIcon} from "lib/assets/Icons/KeplrIcon";
-import {MetaMaskIcon} from "lib/assets/Icons/MetaMaskIcon";
-import {TallyHoIcon} from "lib/assets/Icons/TallyHoIcon";
-import {XDEFIIcon} from "lib/assets/Icons/XDEFIIcon";
+import { KeepKeyIcon } from "lib/assets/Icons/KeepKeyIcon";
+import { KeplrIcon } from "lib/assets/Icons/KeplrIcon";
+import { MetaMaskIcon } from "lib/assets/Icons/MetaMaskIcon";
+import { TallyHoIcon } from "lib/assets/Icons/TallyHoIcon";
+import { XDEFIIcon } from "lib/assets/Icons/XDEFIIcon";
 
 const PROJECT_NAME = "*Your Project Name HERE*";
 
@@ -74,7 +74,7 @@ import METAMASK_ICON from "lib/assets/png/metamask.png";
 // @ts-ignore
 import PIONEER_ICON from "lib/assets/png/pioneer.png";
 // import Context from "lib/context";
-import {usePioneer} from "lib/context/Pioneer";
+import { usePioneer } from "lib/context/Pioneer";
 
 const getWalletType = (user: { walletDescriptions: any[] }, context: any) => {
   if (user && user.walletDescriptions) {
@@ -94,13 +94,13 @@ const getWalletBadgeContent = (walletType: string) => {
   const icon = icons[walletType];
 
   if (!icon) {
-    return <div/>;
+    return <div />;
   }
 
   return (
-      <AvatarBadge boxSize="1.25em" bg="green.500">
-        <Image rounded="full" src={icon}/>
-      </AvatarBadge>
+    <AvatarBadge boxSize="1.25em" bg="green.500">
+      <Image rounded="full" src={icon} />
+    </AvatarBadge>
   );
 };
 
@@ -114,15 +114,15 @@ const getWalletSettingsContent = (walletType: string) => {
   const icon = icons[walletType];
 
   if (!icon) {
-    return <div/>;
+    return <div />;
   }
 
   return icon;
 };
 
 const Header = () => {
-  const {state, dispatch} = usePioneer();
-  const {api, user, context, wallets} = state;
+  const { state, dispatch } = usePioneer();
+  const { api, user, context, wallets } = state;
   const [placement, setPlacement] = useState("left");
   // let api = {}
   // const { isOpen, onOpen, onClose } = useDisclosure();
@@ -173,7 +173,6 @@ const Header = () => {
   const handlePubkeysPageClick = (pageNumber: SetStateAction<number>) => {
     setPubkeysCurrentPage(pageNumber);
   };
-
 
   const setContextWallet = async function (wallet: string) {
     try {
@@ -294,31 +293,33 @@ const Header = () => {
         console.log("walletsAvailable: ", walletsAvailable);
 
         // eslint-disable-next-line no-console
-        console.log('balances: ', balances);
-        if(balances){
+        console.log("balances: ", balances);
+        if (balances) {
           setBalances(balances);
         }
 
         // eslint-disable-next-line no-console
         console.log("pubkeys: ", pubkeys);
-        let newPubkeys:any = []
-        console.log(user.walletDescriptions)
-        for(let i = 0; i < pubkeys.length; i++) {
-          let pubkey = pubkeys[i];
-          let context = pubkey.context;
+        const newPubkeys: any = [];
+        console.log(user.walletDescriptions);
+        for (let i = 0; i < pubkeys.length; i++) {
+          const pubkey = pubkeys[i];
+          const context = pubkey.context;
           console.log("context: ", context);
-          let walletType = walletDescriptions.filter((wallet: { context: any; }) => wallet.context === context)[0]?.type;
+          const walletType = walletDescriptions.filter(
+            (wallet: { context: any }) => wallet.context === context
+          )[0]?.type;
           console.log("walletType: ", walletType);
-          const icons:any = {
+          const icons: any = {
             metamask: METAMASK_ICON,
             keepkey: KEEPKEY_ICON,
             native: PIONEER_ICON,
           };
           // @ts-ignore
-          let walletImage = icons[walletType];
+          const walletImage = icons[walletType];
           console.log("walletImage: ", walletImage);
           pubkey.walletImage = walletImage;
-          newPubkeys.push(pubkey)
+          newPubkeys.push(pubkey);
         }
         // const updatedPubkeys = user.pubkeys.map((pubkey: { context: any; }) => ({
         //   ...pubkey,
@@ -402,7 +403,7 @@ const Header = () => {
     }
   };
 
-  const handleCopyClick = async (event:any, address:string) => {
+  const handleCopyClick = async (event: any, address: string) => {
     event.stopPropagation(); // Prevent the card from being clicked
 
     try {
@@ -425,16 +426,16 @@ const Header = () => {
   }, [copySuccess]);
 
   const renderPubkeysPagination = pubkeysPageNumbers.map((pageNumber) => (
-      <Button
-          key={pageNumber}
-          onClick={() => handlePubkeysPageClick(pageNumber)}
-          colorScheme={pageNumber === pubkeysCurrentPage ? "teal" : "gray"}
-          variant="outline"
-          size="sm"
-          mx="1"
-      >
-        {pageNumber}
-      </Button>
+    <Button
+      key={pageNumber}
+      onClick={() => handlePubkeysPageClick(pageNumber)}
+      colorScheme={pageNumber === pubkeysCurrentPage ? "teal" : "gray"}
+      variant="outline"
+      size="sm"
+      mx="1"
+    >
+      {pageNumber}
+    </Button>
   ));
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -647,19 +648,19 @@ const Header = () => {
                   <AccordionItem>
                     <h2>
                       <AccordionButton>
-                         <Box as="span" flex="1" textAlign="left">
+                        <Box as="span" flex="1" textAlign="left">
                           Balances {balances.length}
-                         </Box>
+                        </Box>
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
                     <AccordionPanel pb={4}>
-                      <Balances balances={balances}></Balances>                      
-                       {/*{balances.map((balance: any) => (*/}
-                       {/*   <div>*/}
-                       {/*     <Balance balance={balance}></Balance>*/}
-                       {/*   </div>*/}
-                       {/*))}*/}
+                      <Balances balances={balances}></Balances>
+                      {/*{balances.map((balance: any) => (*/}
+                      {/*   <div>*/}
+                      {/*     <Balance balance={balance}></Balance>*/}
+                      {/*   </div>*/}
+                      {/*))}*/}
                     </AccordionPanel>
                   </AccordionItem>
                 </Accordion>
@@ -672,36 +673,42 @@ const Header = () => {
                 </h2>
                 <Stack spacing="2">
                   {currentPubkeys.map((pubkey: any, index: number) => (
-                      <Card
-                          key={pubkey.pubkey}
-                          onClick={() => handleCardClick(pubkey.pubkey)}
-                          variant="elevated"
-                          maxW="sm"
-                          borderWidth="1px"
-                          borderRadius="md"
-                          boxShadow="md"
-                          _hover={{ boxShadow: "lg" }}
-                      >
-                        <CardBody>
-                          <Flex align="center">
-                            <Avatar size="sm" src={pubkey.walletImage} marginRight="2" />
-                            <Box display='block' overflowY='scroll'>
-                              <Box>
-                                <Text>
-                                  {pubkey.symbol}: {pubkey.master}
-                                </Text>
-                              </Box>
-                              <Button
-                                  size="xs"
-                                  onClick={(event) => handleCopyClick(event, pubkey.master)}
-                                  marginTop="1"
-                              >
-                                {copySuccess ? "Copied!" : "Copy to Clipboard"}
-                              </Button>
+                    <Card
+                      key={pubkey.pubkey}
+                      onClick={() => handleCardClick(pubkey.pubkey)}
+                      variant="elevated"
+                      maxW="sm"
+                      borderWidth="1px"
+                      borderRadius="md"
+                      boxShadow="md"
+                      _hover={{ boxShadow: "lg" }}
+                    >
+                      <CardBody>
+                        <Flex align="center">
+                          <Avatar
+                            size="sm"
+                            src={pubkey.walletImage}
+                            marginRight="2"
+                          />
+                          <Box display="block" overflowY="scroll">
+                            <Box>
+                              <Text>
+                                {pubkey.symbol}: {pubkey.master}
+                              </Text>
                             </Box>
-                          </Flex>
-                        </CardBody>
-                      </Card>
+                            <Button
+                              size="xs"
+                              onClick={(event) =>
+                                handleCopyClick(event, pubkey.master)
+                              }
+                              marginTop="1"
+                            >
+                              {copySuccess ? "Copied!" : "Copy to Clipboard"}
+                            </Button>
+                          </Box>
+                        </Flex>
+                      </CardBody>
+                    </Card>
                   ))}
                 </Stack>
                 {renderPubkeysPagination}

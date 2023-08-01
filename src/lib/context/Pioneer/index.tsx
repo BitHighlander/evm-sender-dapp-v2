@@ -179,7 +179,7 @@ export const PioneerProvider = ({
   const [state, dispatch] = useReducer(reducer, initialState);
   // const [username, setUsername] = useState<string | null>(null);
   // const [context, setContext] = useState<string | null>(null);
-  const [wallets, setSetWallets] = useState([]);
+  const [wallets, setWallets] = useState([]);
   const [context, setContext] = useState<string | null>(null);
   const [blockchainContext, setBlockchainContext] = useState<string | null>(
     null
@@ -243,7 +243,8 @@ export const PioneerProvider = ({
       // add custom paths
       const paths: any = [];
       // @ts-ignore
-      const spec = import.meta.env.VITE_PIONEER_URL_SPEC ||
+      const spec =
+        import.meta.env.VITE_PIONEER_URL_SPEC ||
         "https://pioneers.dev/spec/swagger.json";
       console.log("spec: ", spec);
       // @ts-ignore
@@ -263,7 +264,7 @@ export const PioneerProvider = ({
       // Example usage
       let walletMetaMask: metaMask.MetaMaskHDWallet | undefined;
       if (isMetaMaskAvailable()) {
-        console.log("isMetaMaskAvailable ")
+        console.log("isMetaMaskAvailable ");
         walletMetaMask = await metaMaskAdapter.pairDevice();
         if (walletMetaMask) {
           // pair metamask
@@ -271,13 +272,13 @@ export const PioneerProvider = ({
           // @ts-ignore
           await walletMetaMask.initialize();
           // eslint-disable-next-line no-console
-          console.log('walletMetaMask: ', walletMetaMask);
-          console.log('ethAddress: ', walletMetaMask.ethAddress);
+          console.log("walletMetaMask: ", walletMetaMask);
+          console.log("ethAddress: ", walletMetaMask.ethAddress);
           // @ts-ignore
-          dispatch({type: WalletActions.ADD_WALLET, payload: walletMetaMask});
+          dispatch({ type: WalletActions.ADD_WALLET, payload: walletMetaMask });
         }
       } else {
-        console.log('MetaMask is not available');
+        console.log("MetaMask is not available");
       }
 
       const checkKeepkeyAvailability = async () => {
@@ -395,14 +396,15 @@ export const PioneerProvider = ({
       } else {
         // prefure KeepKey
         // @ts-ignore
-        const walletPreferred = walletKeepKey || walletMetaMask || walletSoftware;
+        const walletPreferred =
+          walletKeepKey || walletMetaMask || walletSoftware;
         // @ts-ignore
         console.log("walletPreferred: ", walletPreferred.type);
 
         // get pubkeys
         // const pubkeys = await appInit.getPubkeys(walletPreferred);
         // console.log("pubkeys: ", pubkeys);
-        
+
         // @ts-ignore
         // await appInit.refresh()
         // @ts-ignore
@@ -422,7 +424,7 @@ export const PioneerProvider = ({
         //   console.log("successKeepKey: ", successKeepKey);
         // }
         if (walletMetaMask) {
-          console.log("walletMetaMask found: ",walletMetaMask)
+          console.log("walletMetaMask found: ", walletMetaMask);
           const successMetaMask = await appInit.pairWallet(walletMetaMask);
           console.log("successMetaMask: ", successMetaMask);
         }
@@ -437,12 +439,12 @@ export const PioneerProvider = ({
         console.log("api: ", api);
 
         // @ts-ignore
-        if(api){
+        if (api) {
           // @ts-ignore
           dispatch({ type: WalletActions.SET_APP, payload: appInit });
           // @ts-ignore
           dispatch({ type: WalletActions.SET_API, payload: api });
-          
+
           // @ts-ignore
           const user = await api.User();
           // eslint-disable-next-line no-console
@@ -471,10 +473,17 @@ export const PioneerProvider = ({
           // let context = user.data.context;
           // let walletContext = user.data.walletDescriptions.filter(context);
 
-          setBlockchainContext(user.data.blockchainContext);
-          setAssetContext(user.data.assetContext);
+          //set wallets
+          if (user.data.wallets) setWallets(user.data.wallets);
+          if (user.data.walletDescriptions)
+            setWallets(user.data.walletDescriptions);
+
+          if (user.data.blockchainContext)
+            setBlockchainContext(user.data.blockchainContext);
+          if (user.data.assetContext) setAssetContext(user.data.assetContext);
+          if (user.data.context) setContext(user.data.context);
           // eslint-disable-next-line no-console
-          // console.log("user: ", user);  
+          // console.log("user: ", user);
         }
       }
     } catch (e) {

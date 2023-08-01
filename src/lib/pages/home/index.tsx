@@ -30,7 +30,6 @@ import { Logo } from "./components/Logo";
 import { usePioneer } from "lib/context/Pioneer";
 import Web3 from "web3";
 
-
 const ALL_CHAINS = [
   { name: "ethereum", chain_id: 1, symbol: "ETH" },
   { name: "polygon", chain_id: 137, symbol: "MATIC" },
@@ -84,6 +83,9 @@ const Home = () => {
   const onSend = async function () {
     try {
       console.log("onSend");
+      //get current context
+
+      //build transaction
     } catch (e) {
       console.error("Error on send!", e);
     }
@@ -113,6 +115,11 @@ const Home = () => {
 
   const onStart = async function () {
     try {
+      //get wallets
+      console.log("app: ", app);
+      const walletDescriptions = app.walletDescriptions;
+      console.log("walletDescriptions: ", walletDescriptions);
+
       const addressInfo = {
         addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
         coin: "Ethereum",
@@ -138,6 +145,7 @@ const Home = () => {
         // @ts-ignore
         new Web3.providers.HttpProvider(info.data[0].service)
       );
+      // @ts-ignore
       setWeb3(web3);
 
       web3.eth.getBalance(address, function (err: any, result: any) {
@@ -362,7 +370,7 @@ const Home = () => {
                         <div>no token balance</div>
                       )}
                       {prescision ? (
-                        <div>prescision: {prescision}</div>
+                        <div>precision: {prescision}</div>
                       ) : (
                         <div />
                       )}
@@ -385,7 +393,7 @@ const Home = () => {
                           type="text"
                           name="address"
                           value={toAddress}
-                          placeholder="0x651982e85D5E43db682cD6153488083e1b810798"
+                          placeholder="0x6519....."
                           onChange={handleInputChangeAddress}
                         />
                       </div>
