@@ -192,42 +192,9 @@ const Home = () => {
       } else if (contract && isNFT) {
         // @ts-ignore
         console.log("NFT send: ", contract);
-        console.log("NFT_ABI: ", NFT_ABI);
-        // Call the function to get the balance of the receiverAddress (assuming ERC-721 standard)
-        // @ts-ignore
-        // const contractAbi = new web3.eth.Contract(NFT_ABI, contract);
-        //
-        // // @ts-ignore
-        // const balance = await contractAbi.methods.balanceOf(address).call();
-        // console.log("balance: ", balance);
-        //
-        // if(balance == 0) throw Error("You do not own this NFT");
-        //
-        // // Encode the parameters for the "transfer" function
-        // // @ts-ignore
-        // const transferParameters = web3.eth.abi.encodeParameters(
-        //   ["address", "uint256"],
-        //   [address, tokenId]
-        // );
-        // try {
-        //   // @ts-ignore
-        //   gasLimit = await web3.eth.estimateGas({
-        //     to: address,
-        //     value: 0,
-        //     data: transferParameters,
-        //   });
-        //   // @ts-ignore
-        //   gasLimit = web3.utils.toHex(gasLimit + 941000); // Add 21000 gas to cover the size of the data payload
-        // } catch (e) {
-        //   console.error("failed to get ESTIMATE GAS: ", e);
-        //   // @ts-ignore
-        //   gasLimit = web3.utils.toHex(30000 + 41000);
-        // }
-        // // Combine the function selector and encoded parameters to create the full data for the transaction
-        // const tokenData =
-        //   transferFunctionSelector + transferParameters.slice(2); // Remove the first 2 characters ("0x") from the encoded parameters
-
+        // console.log("NFT_ABI: ", NFT_ABI);
         // Create a contract instance
+        // @ts-ignore
         const contractAbi = new web3.eth.Contract(NFT_ABI, contract);
 
         // Call the function to get the balance of the NFT owner
@@ -262,13 +229,25 @@ const Home = () => {
           transferFunctionSelector + transferParameters.slice(2); // Remove the first 2 characters ("0x") from the encoded parameters
 
         console.log("tokenData: ", tokenData);
+        try {
+          // @ts-ignore
+          gasLimit = await web3.eth.estimateGas({
+            to: address,
+            value: "0x0",
+            data: tokenData,
+          });
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(gasLimit + 941000); // Add 21000 gas to cover the size of the data payload
+        } catch (e) {
+          console.error("failed to get ESTIMATE GAS: ", e);
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(30000 + 41000);
+        }
 
         input = {
           addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
           nonce,
           gasLimit,
-          // maxFeePerGas:gasPrice,
-          // maxPriorityFeePerGas:gasPrice,
           gasPrice,
           gas: gasLimit,
           value: "0x0",
@@ -420,6 +399,7 @@ const Home = () => {
       // @ts-ignore
       setWeb3(web3);
 
+      // @ts-ignore
       web3.eth.getBalance(address, function (err: any, result: any) {
         if (err) {
           // @ts-ignore
@@ -584,6 +564,7 @@ const Home = () => {
       setWeb3(web3);
 
       //if balance > 0 show send modal
+      // @ts-ignore
       web3.eth.getBalance(address, function (err: any, result: any) {
         if (err) {
           //console.log(err)
