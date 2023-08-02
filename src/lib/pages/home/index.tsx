@@ -30,6 +30,7 @@ import React, { useEffect, useState } from "react";
 import { Logo } from "./components/Logo";
 import { NFT_ABI } from "./components/NFTAbi";
 import { usePioneer } from "lib/context/Pioneer";
+// @ts-ignore
 import Web3 from "web3";
 
 // @ts-ignore
