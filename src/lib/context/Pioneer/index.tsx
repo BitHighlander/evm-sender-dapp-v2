@@ -42,8 +42,8 @@ import * as core from "@shapeshiftoss/hdwallet-core";
 // import * as keplr from "@shapeshiftoss/hdwallet-keplr";
 import * as metaMask from "@shapeshiftoss/hdwallet-metamask";
 import type { NativeHDWallet } from "@shapeshiftoss/hdwallet-native";
-import { NativeAdapter } from "@shapeshiftoss/hdwallet-native";
-import { entropyToMnemonic } from "bip39";
+// import { NativeAdapter } from "@shapeshiftoss/hdwallet-native";
+// import { entropyToMnemonic } from "bip39";
 
 import {
   createContext,
@@ -244,6 +244,7 @@ export const PioneerProvider = ({
       const paths: any = [];
       // @ts-ignore
       const spec =
+        // @ts-ignore
         import.meta.env.VITE_PIONEER_URL_SPEC ||
         "https://pioneers.dev/spec/swagger.json";
       console.log("spec: ", spec);
@@ -397,6 +398,7 @@ export const PioneerProvider = ({
         // prefure KeepKey
         // @ts-ignore
         const walletPreferred =
+          // @ts-ignore
           walletKeepKey || walletMetaMask || walletSoftware;
         // @ts-ignore
         console.log("walletPreferred: ", walletPreferred.type);

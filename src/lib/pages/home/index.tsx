@@ -125,7 +125,9 @@ const Home = () => {
         console.log("valuePRE: ", amount);
         //"0.01"
         // Use BigNumber to handle the large value and perform calculations
+        // @ts-ignore
         const amountSat = parseInt(
+          // @ts-ignore
           amount * Math.pow(10, prescision)
         ).toString();
 
@@ -564,7 +566,9 @@ const Home = () => {
       console.log("handleSelect input: ", input.target.value);
 
       //get provider info
-      const info = await api.SearchByNetworkName({blockchain:input.target.value});
+      const info = await api.SearchByNetworkName({
+        blockchain: input.target.value,
+      });
       console.log("handleSelect: ", info.data[0]);
       console.log("handleSelect: chainId: ", info.data[0].chainId);
       setIcon(info.data[0].image);
