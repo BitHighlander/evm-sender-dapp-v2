@@ -4,6 +4,7 @@ import {
   Card,
   Select,
   Heading,
+  Avatar,
   Box,
   Text,
   VStack,
@@ -27,8 +28,16 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { Logo } from "./components/Logo";
+import { NFT_ABI } from "./components/NFTAbi";
 import { usePioneer } from "lib/context/Pioneer";
 import Web3 from "web3";
+
+// @ts-ignore
+import KEEPKEY_ICON from "lib/assets/png/keepkey.png";
+// @ts-ignore
+import METAMASK_ICON from "lib/assets/png/metamask.png";
+// @ts-ignore
+import PIONEER_ICON from "lib/assets/png/pioneer.png";
 
 const ALL_CHAINS = [
   { name: "ethereum", chain_id: 1, symbol: "ETH" },
@@ -38,28 +47,36 @@ const ALL_CHAINS = [
   { name: "gnosis", chain_id: 100, symbol: "xDAI" },
   { name: "binance-smart-chain", chain_id: 56, symbol: "BNB" },
   { name: "smart-bitcoin-cash", chain_id: 10000, symbol: "BCH" },
-  { name: "arbitrum", chain_id: 42161, symbol: "ARB" },
+  // { name: "arbitrum", chain_id: 42161, symbol: "ARB" }, //TODO push node
   { name: "fuse", chain_id: 122, symbol: "FUSE" },
-  { name: "bittorrent", chain_id: 199, symbol: "BTT" },
-  { name: "pulsechain", chain_id: 369, symbol: "PLS" },
+  // { name: "bittorrent", chain_id: 199, symbol: "BTT" },//TODO push node
   { name: "celo", chain_id: 42220, symbol: "CELO" },
   { name: "avalanche-c-chain", chain_id: 43114, symbol: "AVAX" },
-  { name: "görli", chain_id: 5, symbol: "GOR" },
+  // { name: "görli", chain_id: 5, symbol: "GOR" },
   { name: "eos", chain_id: 59, symbol: "EOS" },
-  { name: "ethereum-classic", chain_id: 61, symbol: "ETC" },
+  // { name: "ethereum-classic", chain_id: 61, symbol: "ETC" }, //TODO push node
   { name: "evmos", chain_id: 9001, symbol: "EVMOS" },
-  { name: "poa-core", chain_id: 99, symbol: "POA" },
+  // { name: "poa-core", chain_id: 99, symbol: "POA" }, //TODO push node
 ];
+
+interface WalletOption {
+  context: string;
+  icon: any;
+}
 
 const Home = () => {
   const { state } = usePioneer();
   const { api, wallet, app } = state;
   const [address, setAddress] = useState("");
+  const [walletOptions, setWalletOptions] = useState([]);
   const [balance, setBalance] = useState("0.000");
   const [tokenBalance, setTokenBalance] = useState("0.000");
   const [amount, setAmount] = useState("0.00000000");
   const [contract, setContract] = useState("");
+  const [selectedWallet, setSelectedWallet] = useState(null);
   const [block, setBlock] = useState("");
+  const [isNFT, setIsNFT] = useState(false);
+  const [tokenId, setTokenId] = useState("");
   const [icon, setIcon] = useState("https://pioneers.dev/coins/ethereum.png");
   const [service, setService] = useState("");
   const [tokenName, setTokenName] = useState("");
@@ -84,8 +101,232 @@ const Home = () => {
     try {
       console.log("onSend");
       //get current context
-
+      console.log("prescision: ", prescision);
       //build transaction
+      //web3 get nonce
+      // @ts-ignore
+      let nonce = await web3.eth.getTransactionCount(address);
+      // @ts-ignore
+      nonce = web3.utils.toHex(nonce);
+      app.sendToAddress();
+      //get gas price
+      // @ts-ignore
+      let gasPrice = await web3.eth.getGasPrice();
+      // @ts-ignore
+      gasPrice = web3.utils.toHex(gasPrice);
+      console.log("gasPrice: ", gasPrice);
+      let gasLimit;
+      let input;
+      //get balance
+      if (contract && !isNFT) {
+        console.log("THIS IS A TOKEN SEND!");
+        if (!contract) throw Error("Invalid token contract address");
+        // @ts-ignore
+        console.log("valuePRE: ", amount);
+        //"0.01"
+        // Use BigNumber to handle the large value and perform calculations
+        const amountSat = parseInt(
+          amount * Math.pow(10, prescision)
+        ).toString();
+
+        console.log("amountSat: ", amountSat.toString());
+        //"10000000000"
+        //"1"
+        console.log("amountSat: ", amountSat);
+        console.log("valamountSatue: ", amountSat.toString());
+        //get token data
+        // @ts-ignore
+        const tokenData = await web3.eth.abi.encodeFunctionCall(
+          {
+            name: "transfer",
+            type: "function",
+            inputs: [
+              {
+                type: "address",
+                name: "_to",
+              },
+              {
+                type: "uint256",
+                name: "_value",
+              },
+            ],
+          },
+          [toAddress, amountSat]
+        );
+        console.log("tokenData: ", tokenData);
+        //get gas limit
+        try {
+          // @ts-ignore
+          gasLimit = await web3.eth.estimateGas({
+            to: address,
+            value: amountSat,
+            data: tokenData,
+          });
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(gasLimit + 941000); // Add 21000 gas to cover the size of the data payload
+        } catch (e) {
+          console.error("failed to get ESTIMATE GAS: ", e);
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(30000 + 41000);
+        }
+
+        //sign
+        input = {
+          addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
+          nonce,
+          gasPrice,
+          gas: gasLimit,
+          gasLimit,
+          maxFeePerGas: gasPrice,
+          maxPriorityFeePerGas: gasPrice,
+          value: "0x0",
+          from: address,
+          to: contract,
+          data: tokenData,
+          chainId,
+        };
+        //console.log("input: ",input)
+      } else if (contract && isNFT) {
+        // @ts-ignore
+        console.log("NFT send: ", contract);
+        console.log("NFT_ABI: ", NFT_ABI);
+        // Call the function to get the balance of the receiverAddress (assuming ERC-721 standard)
+        // @ts-ignore
+        // const contractAbi = new web3.eth.Contract(NFT_ABI, contract);
+        //
+        // // @ts-ignore
+        // const balance = await contractAbi.methods.balanceOf(address).call();
+        // console.log("balance: ", balance);
+        //
+        // if(balance == 0) throw Error("You do not own this NFT");
+        //
+        // // Encode the parameters for the "transfer" function
+        // // @ts-ignore
+        // const transferParameters = web3.eth.abi.encodeParameters(
+        //   ["address", "uint256"],
+        //   [address, tokenId]
+        // );
+        // try {
+        //   // @ts-ignore
+        //   gasLimit = await web3.eth.estimateGas({
+        //     to: address,
+        //     value: 0,
+        //     data: transferParameters,
+        //   });
+        //   // @ts-ignore
+        //   gasLimit = web3.utils.toHex(gasLimit + 941000); // Add 21000 gas to cover the size of the data payload
+        // } catch (e) {
+        //   console.error("failed to get ESTIMATE GAS: ", e);
+        //   // @ts-ignore
+        //   gasLimit = web3.utils.toHex(30000 + 41000);
+        // }
+        // // Combine the function selector and encoded parameters to create the full data for the transaction
+        // const tokenData =
+        //   transferFunctionSelector + transferParameters.slice(2); // Remove the first 2 characters ("0x") from the encoded parameters
+
+        // Create a contract instance
+        const contractAbi = new web3.eth.Contract(NFT_ABI, contract);
+
+        // Call the function to get the balance of the NFT owner
+        const balance = await contractAbi.methods.balanceOf(address).call();
+        console.log("balance: ", balance);
+
+        if (balance == 0) {
+          throw new Error("You do not own this NFT");
+        }
+
+        // Define the function selector for the transfer function
+        // @ts-ignore
+        const transferFunctionSelector = web3.eth.abi.encodeFunctionSignature({
+          name: "transferFrom",
+          type: "function",
+          inputs: [
+            { type: "address", name: "_from" },
+            { type: "address", name: "_to" },
+            { type: "uint256", name: "_tokenId" },
+          ],
+        });
+
+        // Encode the parameters for the "transferFrom" function
+        // @ts-ignore
+        const transferParameters = web3.eth.abi.encodeParameters(
+          ["address", "address", "uint256"],
+          [address, toAddress, tokenId]
+        );
+
+        // Combine the function selector and encoded parameters to create the full data for the transaction
+        const tokenData =
+          transferFunctionSelector + transferParameters.slice(2); // Remove the first 2 characters ("0x") from the encoded parameters
+
+        console.log("tokenData: ", tokenData);
+
+        input = {
+          addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
+          nonce,
+          gasLimit,
+          // maxFeePerGas:gasPrice,
+          // maxPriorityFeePerGas:gasPrice,
+          gasPrice,
+          gas: gasLimit,
+          value: "0x0",
+          from: address,
+          to: contract,
+          data: tokenData,
+          chainId,
+        };
+        //@ts-ignore
+        console.log("input: ", input);
+      } else {
+        console.log("THIS IS A NATIVE SEND!");
+        //get value in hex
+        // @ts-ignore
+        const value = web3.utils.toHex(web3.utils.toWei(amount, "ether"));
+        //console.log("value: ",value)
+
+        //get gas limit
+        const gasLimitCall = {
+          to: address,
+          value: value,
+          data: "0x",
+        };
+        let gasLimit;
+        try {
+          // @ts-ignore
+          gasLimit = await web3.eth.estimateGas(gasLimitCall);
+          console.log("gasLimit: ", gasLimit);
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(gasLimit);
+        } catch (e) {
+          // @ts-ignore
+          gasLimit = web3.utils.toHex(300000);
+        }
+
+        //sign
+        input = {
+          addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
+          nonce,
+          gasLimit,
+          // maxFeePerGas:gasPrice,
+          // maxPriorityFeePerGas:gasPrice,
+          gasPrice,
+          gas: gasLimit,
+          value,
+          from: address,
+          to: toAddress,
+          data: "0x",
+          chainId,
+        };
+        //@ts-ignore
+        console.log("input: ", input);
+      }
+      //@ts-ignore
+      console.log("input: ", input);
+      //get gas limit
+      console.log("wallet: ", wallet);
+      //@ts-ignore
+      const responseSign = await wallet.ethSignTx(input);
+      console.log("responseSign: ", responseSign);
+      setSignedTx(responseSign.serialized);
     } catch (e) {
       console.error("Error on send!", e);
     }
@@ -97,11 +338,13 @@ const Home = () => {
       // console.log("onBroadcast: ",signedTx)
       // @ts-ignore
       setLoading(true);
-      // const txHash = await web3.eth.sendSignedTransaction(signedTx);
-      // // console.log(tag,"txHash: ",txHash)
-      // setTxid(txHash.transactionHash);
-      // setBlock(txHash.blockNumber);
-      // setLoading(false);
+      // @ts-ignore
+      const txHash = await web3.eth.sendSignedTransaction(signedTx);
+      // console.log(tag,"txHash: ",txHash)
+      setTxid(txHash.transactionHash);
+      setBlock(txHash.blockNumber);
+      // @ts-ignore
+      setLoading(false);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(tag, e);
@@ -117,8 +360,34 @@ const Home = () => {
     try {
       //get wallets
       console.log("app: ", app);
-      const walletDescriptions = app.walletDescriptions;
-      console.log("walletDescriptions: ", walletDescriptions);
+      console.log("onStart context: ", app.context);
+      console.log("onStart wallets: ", app.wallets);
+      console.log("onStart walletDescriptions: ", app);
+      console.log("onStart walletDescriptions: ", app.user);
+      console.log("onStart walletDescriptions: ", app.user.walletDescriptions);
+      // console.log("walletDescriptions: ", app.walletDescriptions.length);
+      if (app.user.walletDescriptions) {
+        const walletOptions: any = [];
+        for (let i = 0; i < app.user.walletDescriptions.length; i++) {
+          const walletDescription = app.user.walletDescriptions[i];
+          console.log("wallet: ", walletDescription);
+          const walletOption: any = {
+            context: walletDescription.context,
+          };
+          if (walletDescription.type === "keepkey") {
+            walletOption.icon = KEEPKEY_ICON;
+          }
+          if (walletDescription.type === "metamask") {
+            walletOption.icon = METAMASK_ICON;
+          }
+          if (walletDescription.type === "native") {
+            walletOption.icon = PIONEER_ICON;
+          }
+          walletOptions.push(walletOption);
+        }
+        console.log("walletOptions: ", walletOptions);
+        setWalletOptions(walletOptions);
+      }
 
       const addressInfo = {
         addressNList: [2147483692, 2147483708, 2147483648, 0, 0],
@@ -169,7 +438,7 @@ const Home = () => {
 
   useEffect(() => {
     onStart();
-  }, [api]);
+  }, [api, app, app?.walletDescriptions]);
 
   const handleClose = async function () {
     try {
@@ -189,8 +458,13 @@ const Home = () => {
     }
   };
 
-  const handleClickTabs = async function (event: any) {
+  const handleClickTabs = async function (type: any) {
     try {
+      if (type === "NFT") {
+        setIsNFT(true);
+      } else {
+        setIsNFT(false);
+      }
       console.log("Tab Clicked!");
       //get tokens for chain
 
@@ -262,6 +536,7 @@ const Home = () => {
         } else {
           // @ts-ignore
           setError(
+            // @ts-ignore
             `no balance on this token! chainId: ${chainId} contract: ${contract}`
           );
         }
@@ -274,12 +549,22 @@ const Home = () => {
     }
   };
 
+  const handleInputChangeTokenId = async function (input: any) {
+    try {
+      const inputValue = input.target.value;
+      console.log("handleInputChangeTokenId: ", inputValue);
+      setTokenId(inputValue);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleSelect = async function (input: any) {
     try {
       console.log("handleSelect input: ", input.target.value);
 
       //get provider info
-      const info = await api.SearchByNetworkName(input.target.value);
+      const info = await api.SearchByNetworkName({blockchain:input.target.value});
       console.log("handleSelect: ", info.data[0]);
       console.log("handleSelect: chainId: ", info.data[0].chainId);
       setIcon(info.data[0].image);
@@ -309,6 +594,13 @@ const Home = () => {
     }
   };
 
+  const handleSelectWallet = (event: any) => {
+    const selectedContext = event.target.value;
+    console.log("selectedContext: ", selectedContext);
+    setSelectedWallet(selectedContext);
+  };
+
+  // @ts-ignore
   return (
     <div>
       <Modal isOpen={isOpen} onClose={() => handleClose()} size="xl">
@@ -329,10 +621,16 @@ const Home = () => {
                 <Tabs>
                   <TabList>
                     <Tab>Native</Tab>
-                    <Tab onClick={handleClickTabs}>Token</Tab>
+                    <Tab onClick={() => handleClickTabs("Token")}>Token</Tab>
+                    <Tab onClick={() => handleClickTabs("NFT")}>NFT</Tab>
                   </TabList>
                   <TabPanels>
                     <TabPanel>
+                      <div>
+                        Context: <small>{app?.user?.context || ""}</small>
+                      </div>
+                      <div>balance: {balance}</div>
+                      <br />
                       <div>
                         amount:{" "}
                         <input
@@ -396,6 +694,46 @@ const Home = () => {
                           placeholder="0x6519....."
                           onChange={handleInputChangeAddress}
                         />
+                      </div>
+                    </TabPanel>
+                    <TabPanel>
+                      <div>
+                        isNFT: {isNFT.toString()}
+                        <br />
+                        {tokenBalance ? (
+                          <div>tokenBalance: {tokenBalance}</div>
+                        ) : (
+                          <div>no token balance</div>
+                        )}
+                        <br />
+                        contract:{" "}
+                        <input
+                          type="text"
+                          name="contract"
+                          value={contract}
+                          onChange={handleInputChangeContract}
+                        />
+                        <br />
+                        <br />
+                        tokenId:{" "}
+                        <input
+                          type="text"
+                          name="tokenId"
+                          value={tokenId}
+                          onChange={handleInputChangeTokenId}
+                        />
+                        <br />
+                        <br />
+                        <div>
+                          address:{" "}
+                          <input
+                            type="text"
+                            name="address"
+                            value={toAddress}
+                            placeholder="0x6519....."
+                            onChange={handleInputChangeAddress}
+                          />
+                        </div>
                       </div>
                     </TabPanel>
                   </TabPanels>
