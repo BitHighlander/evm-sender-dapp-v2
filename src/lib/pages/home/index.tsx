@@ -30,7 +30,6 @@ import React, { useEffect, useState } from "react";
 import { Logo } from "./components/Logo";
 import { NFT_ABI } from "./components/NFTAbi";
 import { usePioneer } from "lib/context/Pioneer";
-// @ts-ignore
 import Web3 from "web3";
 
 // @ts-ignore
@@ -398,20 +397,20 @@ const Home = () => {
       );
       // @ts-ignore
       setWeb3(web3);
+      // Get the current block number
+      const blockNumber = await web3.eth.getBlockNumber();
+      // Get the block information using the block number
+      const blockData = await web3.eth.getBlock(blockNumber);
 
-      // @ts-ignore
-      web3.eth.getBalance(address, function (err: any, result: any) {
-        if (err) {
-          // @ts-ignore
-          console.error(err);
-        } else {
-          //console.log(web3.utils.fromWei(result, "ether") + " ETH")
-          // @ts-ignore
-          setBalance(
-            web3.utils.fromWei(result, "ether") + " " + info.data[0].symbol
-          );
-        }
-      });
+      const timestamp = blockData.timestamp;
+
+      // Get the account balance at that specific block using the timestamp
+      const balanceResult = await web3.eth.getBalance(address, timestamp);
+      const balanceInEther = web3.utils.fromWei(balanceResult, "ether");
+      setBalance(balanceInEther);
+      // Now you can use the balanceInEther and blockNumber as needed
+      console.log("Balance in Ether: ", balanceInEther);
+      console.log("Block Number: ", blockNumber);
 
       //TODO get tokens for chain
     } catch (e) {
@@ -564,17 +563,41 @@ const Home = () => {
       setWeb3(web3);
 
       //if balance > 0 show send modal
-      // @ts-ignore
-      web3.eth.getBalance(address, function (err: any, result: any) {
-        if (err) {
-          //console.log(err)
-        } else {
-          //console.log(web3.utils.fromWei(result, "ether") + " ETH")
-          setBalance(
-            web3.utils.fromWei(result, "ether") + " " + info.data[0].symbol
-          );
-        }
-      });
+      const blockNumber = await web3.eth.getBlockNumber();
+      console.log("blockNumber: ", blockNumber);
+
+      // Get the block information using the block number
+      const blockData = await web3.eth.getBlock(blockNumber);
+
+      const timestamp = blockData.timestamp;
+
+      // Get the account balance at that specific block using the timestamp
+      const balanceResult = await web3.eth.getBalance(address, timestamp);
+      const balanceInEther = web3.utils.fromWei(balanceResult, "ether");
+      setBalance(balanceInEther);
+      // Now you can use the balanceInEther and blockNumber as needed
+      console.log("Balance in Ether: ", balanceInEther);
+      console.log("Block Number: ", blockNumber);
+
+
+      // const blockNumber = await web3.eth.getBlockNumber();
+      // console.log("blockNumber: ", blockNumber);
+      // // @ts-ignore
+      // web3.eth.getBalance(
+      //   address,
+      //   blockNumber,
+      //   // @ts-ignore
+      //   function (err: any, result: any) {
+      //     if (err) {
+      //       //console.log(err)
+      //     } else {
+      //       console.log(web3.utils.fromWei(result, "ether") + " ETH")
+      //       setBalance(
+      //         web3.utils.fromWei(result, "ether") + " " + info.data[0].symbol
+      //       );
+      //     }
+      //   }
+      // );
     } catch (e) {
       console.error(e);
     }
