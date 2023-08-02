@@ -82,7 +82,7 @@ const Send = (Asset: any) => {
       setBlockchain(asset.data[0].blockchain);
       //@ts-ignore
       if (!asset.data[0].blockchain)
-        Alert("unknown asset! ciap: " + Asset.asset.caip);
+        alert("unknown asset! ciap: " + Asset.asset.caip);
     } catch (error) {
       console.error(error);
     }
