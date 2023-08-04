@@ -308,8 +308,8 @@ const Home = () => {
       console.log("input: ", input);
       //get gas limit
       console.log("wallet: ", wallet);
-      //@ts-ignore
-      const isMetaMask = true;
+      //@ts-ignore @TODO detect context
+      const isMetaMask = false;
       let responseSign;
       if (isMetaMask) {
         responseSign = await wallet.ethSendTx(input);
