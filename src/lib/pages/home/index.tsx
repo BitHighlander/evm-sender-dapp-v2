@@ -313,6 +313,8 @@ const Home = () => {
       let responseSign;
       if (isMetaMask) {
         responseSign = await wallet.ethSendTx(input);
+        console.log("responseSign: ", responseSign);
+        setTxid(responseSign.hash);
       } else {
         responseSign = await wallet.ethSignTx(input);
         console.log("responseSign: ", responseSign);
