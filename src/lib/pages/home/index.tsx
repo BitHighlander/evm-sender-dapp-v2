@@ -260,14 +260,18 @@ const Home = () => {
       } else {
         console.log("THIS IS A NATIVE SEND!");
         //get value in hex
+        console.log("amount: ", amount);
         // @ts-ignore
-        const value = web3.utils.toHex(web3.utils.toWei(amount, "ether"));
-        //console.log("value: ",value)
+        const valueInWei = amount * Math.pow(10, 18); // Keep it as a number without converting to string
+        console.log("valueInWei: ", valueInWei);
+        // @ts-ignore
+        const valueInWeiHex = "0x" + valueInWei.toString(16);
+        console.log("valueInWeiHex: ", valueInWeiHex);
 
         //get gas limit
         const gasLimitCall = {
           to: address,
-          value: value,
+          value: valueInWeiHex, // Use the hexadecimal value
           data: "0x",
         };
         let gasLimit;
@@ -291,7 +295,7 @@ const Home = () => {
           // maxPriorityFeePerGas:gasPrice,
           gasPrice,
           gas: gasLimit,
-          value,
+          value: valueInWeiHex, // Use the hexadecimal value
           from: address,
           to: toAddress,
           data: "0x",
@@ -305,7 +309,14 @@ const Home = () => {
       //get gas limit
       console.log("wallet: ", wallet);
       //@ts-ignore
-      const responseSign = await wallet.ethSignTx(input);
+      const isMetaMask = true;
+      let responseSign;
+      if (isMetaMask) {
+        responseSign = await wallet.ethSendTx(input);
+      } else {
+        responseSign = await wallet.ethSignTx(input);
+        console.log("responseSign: ", responseSign);
+      }
       console.log("responseSign: ", responseSign);
       setSignedTx(responseSign.serialized);
     } catch (e) {
@@ -579,7 +590,6 @@ const Home = () => {
       console.log("Balance in Ether: ", balanceInEther);
       console.log("Block Number: ", blockNumber);
 
-
       // const blockNumber = await web3.eth.getBlockNumber();
       // console.log("blockNumber: ", blockNumber);
       // // @ts-ignore
@@ -812,7 +822,9 @@ const Home = () => {
                   onChange={handleSelect}
                 >
                   {ALL_CHAINS.map((blockchain) => (
-                    <option value={blockchain.name}>{blockchain.symbol}</option>
+                    <option value={blockchain.name}>
+                      {blockchain.name} ({blockchain.symbol})
+                    </option>
                   ))}
                 </Select>
               </Box>
